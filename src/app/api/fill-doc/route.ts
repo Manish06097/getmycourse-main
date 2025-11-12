@@ -7,6 +7,7 @@ import PizZip from "pizzip";
 import { curricula, Curriculum } from '../../../config/curricula';
 import { transformAndFormatAnswersCHC33021 } from '../../../lib/curriculum-logic/CHC33021';
 import { transformAndFormatAnswersCHC30121 } from '../../../lib/curriculum-logic/CHC30121';
+import { transformAndFormatAnswersCHC50121 } from '../../../lib/curriculum-logic/CHC50121';
 
 export const runtime = "nodejs"; // Required to use 'fs' in Next.js App Router
 
@@ -60,13 +61,21 @@ export async function POST(req: NextRequest) {
 
         // Use /tmp for temporary file storage in serverless environments like Vercel
         const tempDir = "/tmp";
-        const templatePath = path.join(process.cwd(), selectedCurriculum.templatePath);
-        const schemaJsonText = await fs.readFile(path.join(process.cwd(), selectedCurriculum.schemaPath), 'utf-8');
+        
+        // Handle both absolute and relative template paths
+        let templatePath: string;
+        if (path.isAbsolute(selectedCurriculum.templatePath)) {
+            templatePath = selectedCurriculum.templatePath;
+        } else {
+            templatePath = path.join(process.cwd(), selectedCurriculum.templatePath);
+        }
+        
+        const schemaJsonText = await fs.readFile(selectedCurriculum.schemaPath, 'utf-8');
         const masterSchema = JSON.parse(schemaJsonText);
 
         if (!existsSync(templatePath)) {
             return NextResponse.json(
-                { ok: false, error: `${selectedCurriculum.templatePath} not found.` },
+                { ok: false, error: `${templatePath} not found.` },
                 { status: 404 }
             );
         }
@@ -76,7 +85,10 @@ export async function POST(req: NextRequest) {
             dataForDocx = transformAndFormatAnswersCHC33021(answers, studentName, masterSchema);
         } else if (selectedCurriculum.id === "CHC30121") {
             dataForDocx = transformAndFormatAnswersCHC30121(answers, studentName, masterSchema);
-        } else {
+        } else if (selectedCurriculum.id === "CHC50121") {
+            dataForDocx = transformAndFormatAnswersCHC50121(answers, studentName, masterSchema);
+        }
+        else {
             // Fallback or error for unsupported curriculum types
             return NextResponse.json(
                 { ok: false, error: `Unsupported curriculum ID for document filling: ${curriculumId}` },

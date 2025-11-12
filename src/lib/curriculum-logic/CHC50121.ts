@@ -1,9 +1,9 @@
 import { Type } from '@google/genai';
 
-export function createDynamicJsonSchemaCHC30121(questionData: any): any | null {
+export function createDynamicJsonSchemaCHC50121(questionData: any): any | null {
     try {
         if (!questionData || !questionData.benchMarkAns) {
-            console.warn("Warning: 'questionData' or 'benchMarkAns' is missing for createDynamicJsonSchemaCHC30121.");
+            console.warn("Warning: 'questionData' or 'benchMarkAns' is missing for createDynamicJsonSchemaCHC50121.");
             return null;
         }
 
@@ -21,12 +21,12 @@ export function createDynamicJsonSchemaCHC30121(questionData: any): any | null {
         };
 
     } catch (e) {
-        console.error(`Error: Could not create dynamic JSON schema for CHC30121: ${e}`);
+        console.error(`Error: Could not create dynamic JSON schema for CHC50121: ${e}`);
         return null;
     }
 }
 
-export const systemPromptTextCHC30121 = (firstName: string, unitCode: string) => `You are a highly experienced and qualified Vocational Education and Training (VET) Assessor specializing in the Australian Early Childhood Education and Care sector. Your area of expertise is the CHC30121 Certificate III in Early Childhood Education and Care qualification. You are professional, meticulous, and skilled at evaluating a student's responses against formal assessment criteria.
+export const systemPromptTextCHC50121 = (firstName: string, unitCode: string) => `You are a highly experienced and qualified Vocational Education and Training (VET) Assessor specializing in the Australian Early Childhood Education and Care sector. Your area of expertise is the CHC50121 Diploma of Early Childhood Education and Care qualification. You are professional, meticulous, and skilled at evaluating a student's responses against formal assessment criteria.
 
 Context:
 
@@ -66,10 +66,10 @@ Step-by-Step Instructions to Generate Each Answer:
 
 type Answers = Record<string, any>;
 
-export function transformAndFormatAnswersCHC30121(aiAnswers: Answers, studentName: string, masterSchema: Answers): Record<string, any> {
+export function transformAndFormatAnswersCHC50121(aiAnswers: Answers, studentName: string, masterSchema: Answers): Record<string, any> {
     const transformedData: Record<string, any> = {};
     const studentNameRegex = /\(student name\)/gi;
-    const maxQuestionNumber = 30;
+    const maxQuestionNumber = 30; // Assuming a similar max question number for CHC50121
 
     // Use the master schema as the source of truth for all unit codes
     const allUnitCodes = Object.keys(masterSchema);

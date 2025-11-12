@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import pLimit from 'p-limit';
 import { curricula, Curriculum } from '../../../../config/curricula';
-import { createDynamicJsonSchemaCHC30121, systemPromptTextCHC30121 } from '../../../../lib/curriculum-logic/CHC30121';
+import { createDynamicJsonSchemaCHC50121, systemPromptTextCHC50121 } from '../../../../lib/curriculum-logic/CHC50121';
 
 // ===== In-memory cancellation store (module-scoped) =====
 type GenRecord = { canceled: boolean; controllers: Set<AbortController> };
@@ -87,7 +87,7 @@ async function readFileContent(filePath: string): Promise<string> {
 
 // ====== POST: start generation (SSE) ======
 export async function POST(req: NextRequest) {
-    const curriculumId = "CHC30121"; // Hardcode for this specific route
+    const curriculumId = "CHC50121"; // Hardcode for this specific route
 
     if (!API_KEY) {
         return new NextResponse(encoder.encode(JSON.stringify({ error: "Gemini API key not configured." })), { status: 500 });
@@ -170,7 +170,7 @@ export async function POST(req: NextRequest) {
                                 return;
                             }
 
-                            const dynamicSchema = createDynamicJsonSchemaCHC30121(questionData);
+                            const dynamicSchema = createDynamicJsonSchemaCHC50121(questionData);
                             if (!dynamicSchema) {
                                 sendSseMessage(controller as any, "error", { unitCode, mainQuestionKey, message: "Schema generation failed." });
                                 return;
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
                             const match = transcript.match(unitCodeSummaryRegex);
                             const relevantSubsectionSummary = match ? match[1].trim() : `No specific summary found for unit code ${unitCode}.`;
 
-                            const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC30121(firstName, unitCode);
+                            const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC50121(firstName, unitCode);
 
                             const finalUserPrompt = `${systemPromptText}
 
