@@ -7,7 +7,6 @@ import PizZip from "pizzip";
 import { curricula, Curriculum } from '../../../config/curricula';
 import { transformAndFormatAnswersCHC33021 } from '../../../lib/curriculum-logic/CHC33021';
 import { transformAndFormatAnswersCHC30121 } from '../../../lib/curriculum-logic/CHC30121';
-import { transformAndFormatAnswersCHC50121 } from '../../../lib/curriculum-logic/CHC50121';
 
 export const runtime = "nodejs"; // Required to use 'fs' in Next.js App Router
 
@@ -85,10 +84,7 @@ export async function POST(req: NextRequest) {
             dataForDocx = transformAndFormatAnswersCHC33021(answers, studentName, masterSchema);
         } else if (selectedCurriculum.id === "CHC30121") {
             dataForDocx = transformAndFormatAnswersCHC30121(answers, studentName, masterSchema);
-        } else if (selectedCurriculum.id === "CHC50121") {
-            dataForDocx = transformAndFormatAnswersCHC50121(answers, studentName, masterSchema);
-        }
-        else {
+        } else {
             // Fallback or error for unsupported curriculum types
             return NextResponse.json(
                 { ok: false, error: `Unsupported curriculum ID for document filling: ${curriculumId}` },

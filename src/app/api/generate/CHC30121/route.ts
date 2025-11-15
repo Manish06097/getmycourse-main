@@ -137,6 +137,8 @@ export async function POST(req: NextRequest) {
 
                 const parsedSchemaGuide = JSON.parse(schemaJsonText);
 
+                const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC30121(firstName);
+
                 const allResults: { [key: string]: any } = {};
                 const limit = pLimit(CONCURRENCY_LIMIT);
 
@@ -179,20 +181,12 @@ export async function POST(req: NextRequest) {
                             const specificJsonGuide = { [unitCode]: { [mainQuestionKey]: questionData } };
                             const specificJsonGuideText = JSON.stringify(specificJsonGuide, null, 2);
 
-                            // Extract the relevant subsection summary for the current unitCode
-                            // Extract the relevant subsection summary for the current unitCode from the 'transcript' (which is actually the summary)
-                            const unitCodeSummaryRegex = new RegExp(`### ${unitCode}\\s*([\\s\\S]*?)(?=(?:### [A-Z0-9]+)|$)`, 'm');
-                            const match = transcript.match(unitCodeSummaryRegex);
-                            const relevantSubsectionSummary = match ? match[1].trim() : `No specific summary found for unit code ${unitCode}.`;
-
-                            const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC30121(firstName, unitCode);
-
                             const finalUserPrompt = `${systemPromptText}
 
-Here is the student's summary for unit code ${unitCode} (provided via the 'transcript' field):
---- SUMMARY START ---
-${relevantSubsectionSummary}
---- SUMMARY END ---
+Here is the student's transcript:
+--- TRANSCRIPT START ---
+${transcript}
+--- TRANSCRIPT END ---
 
 Here is the JSON guide for the assessment structure and content:
 --- JSON GUIDE START ---
@@ -200,7 +194,7 @@ ${specificJsonGuideText}
 --- JSON GUIDE END ---
 
 **Your Task:**
-You must act as the VET Assessor. Your goal is to generate a new, comprehensive answer for the question by analyzing the **relevant subsection of the Student Summary for unit code ${unitCode}** (which is part of the overall 'transcript' provided) and using the provided **benchMarkAns** as a style guide.
+You must act as the VET Assessor. Your goal is to generate a new, comprehensive answer for the question by analyzing the **transcript** and using the provided **benchMarkAns** as a style guide.
 
 **Output Instructions:**
 Your response MUST be a single, valid JSON object that strictly adheres to the following JSON Schema. Do NOT include any text, explanations, or markdown formatting outside of the JSON object itself.`;
