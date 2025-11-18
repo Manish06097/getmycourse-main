@@ -7,6 +7,8 @@ import PizZip from "pizzip";
 import { curricula, Curriculum } from '../../../config/curricula';
 import { transformAndFormatAnswersCHC33021 } from '../../../lib/curriculum-logic/CHC33021';
 import { transformAndFormatAnswersCHC30121 } from '../../../lib/curriculum-logic/CHC30121';
+import { transformAndFormatAnswersCHC43121 } from '../../../lib/curriculum-logic/CHC43121';
+import { transformAndFormatAnswersCHC50121 } from '../../../lib/curriculum-logic/CHC50121';
 
 export const runtime = "nodejs"; // Required to use 'fs' in Next.js App Router
 
@@ -84,6 +86,10 @@ export async function POST(req: NextRequest) {
             dataForDocx = transformAndFormatAnswersCHC33021(answers, studentName, masterSchema);
         } else if (selectedCurriculum.id === "CHC30121") {
             dataForDocx = transformAndFormatAnswersCHC30121(answers, studentName, masterSchema);
+        } else if (selectedCurriculum.id === "CHC43121") {
+            dataForDocx = transformAndFormatAnswersCHC43121(answers, studentName, masterSchema);
+        } else if (selectedCurriculum.id === "CHC50121") {
+            dataForDocx = transformAndFormatAnswersCHC50121(answers, studentName, masterSchema);
         } else {
             // Fallback or error for unsupported curriculum types
             return NextResponse.json(
@@ -135,11 +141,32 @@ export async function POST(req: NextRequest) {
         });
     } catch (err: any) {
         console.error("Doc Gen Error:", err);
+
+        // Enhanced logging for Docxtemplater errors
         if (err.properties && err.properties.errors) {
-            console.error("Docxtemplater errors:", err.properties.errors);
+            console.error("Docxtemplater detailed errors:");
+            err.properties.errors.forEach((e: any, index: number) => {
+                console.error(`Error #${index + 1}:`);
+                console.error(`  Explanation: ${e.explanation}`);
+                console.error(`  Tag ID: ${e.properties?.id || "unknown"}`);
+                console.error(`  Offending placeholder: ${e.properties?.tag || "N/A"}`);
+                console.error(`  Full error object:`, JSON.stringify(e, null, 2));
+            });
+        } else {
+            console.error("No detailed Docxtemplater error properties found. Full error object:", err);
         }
+
+        // Return detailed error info in response for debugging
         return NextResponse.json(
-            { ok: false, error: err?.message || "Failed to fill doc" },
+            {
+                ok: false,
+                error: err?.message || "Failed to fill doc",
+                details: err?.properties?.errors?.map((e: any) => ({
+                    explanation: e.explanation || "No explanation available",
+                    tag: e.properties?.tag || e.properties?.id || "Unknown tag",
+                    full: e,
+                })) || [{ message: "No detailed error info available", fullError: err }],
+            },
             { status: 500 }
         );
     }

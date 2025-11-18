@@ -43,7 +43,7 @@ export function TranscriptForm() {
   const totalInputTokens = Object.values(tokenUsage).reduce((sum, { inputTokens }) => sum + inputTokens, 0);
   const totalOutputTokens = Object.values(tokenUsage).reduce((sum, { outputTokens }) => sum + outputTokens, 0);
   const totalCombinedTokens = totalInputTokens + totalOutputTokens;
-  const totalCost = calculateTokenCost(totalInputTokens, totalOutputTokens, "models/gemini-flash-latest");
+
   const { toast } = useToast();
 
   // Refs for cancel support
@@ -59,6 +59,11 @@ export function TranscriptForm() {
       curriculumId: curricula[0].id, // Default to the first curriculum
     },
   });
+
+  // Dynamically determine model name based on selected curriculum
+  const selectedCurriculum = curricula.find(c => c.id === form.watch("curriculumId"));
+  const modelName = selectedCurriculum?.modelName || "models/gemini-flash-latest";
+  const totalCost = calculateTokenCost(totalInputTokens, totalOutputTokens, modelName);
 
   // Helper function to trigger the download from a base64 string
   function downloadBase64Docx(base64: string, filename: string) {
@@ -505,6 +510,9 @@ export function TranscriptForm() {
         {Object.keys(tokenUsage).length > 0 && (
           <div className="mt-8 p-6 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-inner">
             <h3 className="font-headline text-xl mb-4">Token Usage & Cost</h3>
+            <p className="font-body text-sm text-gray-700 dark:text-gray-300 mb-4">
+              <strong>Model Used:</strong> {modelName}
+            </p>
             <ul className="space-y-3">
               {/* {Object.entries(tokenUsage).map(([section, { inputTokens, outputTokens }]) => (
                 <li key={section} className="font-body">

@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import pLimit from 'p-limit';
 import { curricula, Curriculum } from '../../../../config/curricula';
-import { createDynamicJsonSchemaCHC30121, systemPromptTextCHC30121 } from '../../../../lib/curriculum-logic/CHC30121';
+import { createDynamicJsonSchemaCHC43121, systemPromptTextCHC43121 } from '../../../../lib/curriculum-logic/CHC43121';
 
 // ===== In-memory cancellation store (module-scoped) =====
 type GenRecord = { canceled: boolean; controllers: Set<AbortController> };
@@ -87,7 +87,7 @@ async function readFileContent(filePath: string): Promise<string> {
 
 // ====== POST: start generation (SSE) ======
 export async function POST(req: NextRequest) {
-    const curriculumId = "CHC30121"; // Hardcode for this specific route
+    const curriculumId = "CHC43121"; // Hardcode for this specific route
 
     if (!API_KEY) {
         return new NextResponse(encoder.encode(JSON.stringify({ error: "Gemini API key not configured." })), { status: 500 });
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
 
                 const parsedSchemaGuide = JSON.parse(schemaJsonText);
 
-                const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC30121(firstName);
+                const systemPromptText = selectedCurriculum.systemPromptOverride || systemPromptTextCHC43121(firstName);
 
                 const allResults: { [key: string]: any } = {};
                 const limit = pLimit(CONCURRENCY_LIMIT);
@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
                                 return;
                             }
 
-                            const dynamicSchema = createDynamicJsonSchemaCHC30121(questionData);
+                            const dynamicSchema = createDynamicJsonSchemaCHC43121(questionData);
                             if (!dynamicSchema) {
                                 sendSseMessage(controller as any, "error", { unitCode, mainQuestionKey, message: "Schema generation failed." });
                                 return;
